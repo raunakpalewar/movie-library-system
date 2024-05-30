@@ -107,6 +107,7 @@ app.get('/lists', async (req, res) => {
   }
 });
 
+// Search endpoint
 app.get('/search', async (req, res) => {
   try {
     const { s, type, y, plot, page } = req.query;
@@ -126,6 +127,61 @@ app.get('/search', async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching data from OMDB API:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+// Update list (add movies by IMDb ID)
+app.put('/lists/:id', async (req, res) => {
+  try {
+    const { token } = req.headers;
+    const { movies } = req.body;
+    const { id } = req.params;
+
+    if (!token) {
+      return res.status(401).send('Authorization token is required');
+    }
+
+    if (!movies || !Array.isArray(movies)) {
+      return res.status(400).send('Movies must be an array of IMDb IDs');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const list = await List.findOne({ _id: id, userId: decoded.id });
+
+    if (!list) {
+      return res.status(404).send('List not found');
+    }
+
+    list.movies.push(...movies);
+    await list.save();
+    res.status(200).send('List updated');
+  } catch (error) {
+    console.error('Error updating list:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+// Delete list
+app.delete('/lists/:id', async (req, res) => {
+  try {
+    const { token } = req.headers;
+    const { id } = req.params;
+
+    if (!token) {
+      return res.status(401).send('Authorization token is required');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const list = await List.findOneAndDelete({ _id: id, userId: decoded.id });
+
+    if (!list) {
+      return res.status(404).send('List not found');
+    }
+
+    res.status(200).send('List deleted');
+  } catch (error) {
+    console.error('Error deleting list:', error);
     res.status(500).send('Internal server error');
   }
 });
