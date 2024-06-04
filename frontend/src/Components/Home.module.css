@@ -1,36 +1,192 @@
-.container {
+:root {
+    --background-color: #f0f0f0;
+    --primary-color: #333;
+    --secondary-color: #fff;
+    --button-color: #007bff;
+    --button-hover-color: #0056b3;
+    --error-color: #ff4d4f;
+  }
+  
+  .container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     background-color: var(--background-color);
   }
   
-  .homeContent {
+  .sidebar {
+    width: 250px;
     background-color: var(--secondary-color);
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    text-align: center;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
   
-  h1 {
-    margin-bottom: 1.5rem;
-    color: var(--primary-color);
+  .sidebar h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+  }
+  
+  .listItem {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--primary-color);
+  }
+  
+  .createList {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .input {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
   }
   
   .button {
     background-color: var(--button-color);
     color: #fff;
-    padding: 0.75rem;
+    padding: 0.5rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
   }
   
   .button:hover {
+    background-color: var(--button-hover-color);
+  }
+  
+  .mainContent {
+    flex-grow: 1;
+    padding: 2rem;
+  }
+  
+  .searchContainer {
+    margin-bottom: 2rem;
+  }
+  
+  .searchForm {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .searchInput {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+  }
+  
+  .searchButton {
+    background-color: var(--button-color);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .searchButton:hover {
+    background-color: var(--button-hover-color);
+  }
+  
+  .advancedButton {
+    background-color: var(--button-color);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+  
+  .advancedButton:hover {
+    background-color: var(--button-hover-color);
+  }
+  
+  .advancedSearch {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .inputGroup {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .error {
+    color: var(--error-color);
+    margin-top: 1rem;
+  }
+  
+  .loaderContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+  
+  .directResultContainer {
+    margin-bottom: 2rem;
+  }
+  
+  .directResult {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .directPoster {
+    width: 200px;
+  }
+  
+  .directInfo {
+    flex-grow: 1;
+  }
+  
+  .moviesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .movieTile {
+    background-color: var(--secondary-color);
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .moviePoster {
+    width: 100%;
+    border-radius: 4px;
+  }
+  
+  .movieInfo {
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+  
+  .addButton {
+    background-color: var(--button-color);
+    color: #fff;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  
+  .addButton:hover {
     background-color: var(--button-hover-color);
   }
   

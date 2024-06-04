@@ -643,6 +643,11 @@ app.post('/signin', async (req, res) => {
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     List:
  *       type: object
@@ -746,7 +751,7 @@ app.get('/lists', async (req, res) => {
 
 /**
  * @swagger
- * /lists/{id}:
+ * /lists/{name}:
  *   put:
  *     summary: Update a list by adding movies
  *     tags: [List]
@@ -754,11 +759,11 @@ app.get('/lists', async (req, res) => {
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: name
  *         schema:
  *           type: string
  *         required: true
- *         description: The list ID
+ *         description: The list name
  *     requestBody:
  *       required: true
  *       content:
@@ -780,10 +785,10 @@ app.get('/lists', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.put('/lists/:id', async (req, res) => {
+app.put('/lists/:name', async (req, res) => {
   try {
     const { authorization } = req.headers;
-    const { id } = req.params;
+    const { name } = req.params;
     const { movies } = req.body;
 
     if (!authorization) {
@@ -793,7 +798,7 @@ app.put('/lists/:id', async (req, res) => {
     const token = authorization.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const list = await List.findOne({ _id: id, userId: decoded.id });
+    const list = await List.findOne({ name, userId: decoded.id });
 
     if (!list) {
       return res.status(404).send('List not found');
@@ -810,19 +815,19 @@ app.put('/lists/:id', async (req, res) => {
 
 /**
  * @swagger
- * /lists/{id}:
+ * /lists/{name}:
  *   delete:
- *     summary: Delete a list by ID
+ *     summary: Delete a list by name
  *     tags: [List]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: name
  *         schema:
  *           type: string
  *         required: true
- *         description: The list ID
+ *         description: The list name
  *     responses:
  *       200:
  *         description: List deleted successfully
@@ -833,10 +838,10 @@ app.put('/lists/:id', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.delete('/lists/:id', async (req, res) => {
+app.delete('/lists/:name', async (req, res) => {
   try {
     const { authorization } = req.headers;
-    const { id } = req.params;
+    const { name } = req.params;
 
     if (!authorization) {
       return res.status(401).send('Authorization token is required');
@@ -845,7 +850,7 @@ app.delete('/lists/:id', async (req, res) => {
     const token = authorization.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const list = await List.findOneAndDelete({ _id: id, userId: decoded.id });
+    const list = await List.findOneAndDelete({ name, userId: decoded.id });
 
     if (!list) {
       return res.status(404).send('List not found');
@@ -857,6 +862,127 @@ app.delete('/lists/:id', async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
+/**
+ * @swagger
+ * /lists/{name}/movies:
+ *   get:
+ *     summary: Get all movies in a particular list by name
+ *     tags: [List]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The list name
+ *     responses:
+ *       200:
+ *         description: Movies retrieved successfully
+ *       401:
+ *         description: Authorization token is required
+ *       404:
+ *         description: List not found
+ *       500:
+ *         description: Internal server error
+ */
+app.get('/lists/:name/movies', async (req, res) => {
+  try {
+    const { authorization } = req.headers;
+    const { name } = req.params;
+
+    if (!authorization) {
+      return res.status(401).send('Authorization token is required');
+    }
+
+    const token = authorization.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const list = await List.findOne({ name, userId: decoded.id });
+
+    if (!list) {
+      return res.status(404).send('List not found');
+    }
+
+    // Fetch movies based on the list's movie IDs
+    const movies = await Movie.find({ imdbID: { $in: list.movies } });
+
+    res.json(movies);
+  } catch (error) {
+    console.error('Error fetching list movies:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
+/**
+ * @swagger
+ * /lists/{name}/movies:
+ *   delete:
+ *     summary: Remove a movie from a list by name
+ *     tags: [List]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The list name
+ *       - in: query
+ *         name: imdbID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The IMDb ID of the movie to be removed
+ *     responses:
+ *       200:
+ *         description: Movie removed from the list successfully
+ *       401:
+ *         description: Authorization token is required
+ *       404:
+ *         description: List or movie not found
+ *       500:
+ *         description: Internal server error
+ */
+app.delete('/lists/:name/movies', async (req, res) => {
+  try {
+    const { authorization } = req.headers;
+    const { name } = req.params;
+    const { imdbID } = req.query;
+
+    if (!authorization) {
+      return res.status(401).send('Authorization token is required');
+    }
+
+    const token = authorization.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const list = await List.findOne({ name, userId: decoded.id });
+
+    if (!list) {
+      return res.status(404).send('List not found');
+    }
+
+    if (!list.movies.includes(imdbID)) {
+      return res.status(404).send('Movie not found in the list');
+    }
+
+    list.movies = list.movies.filter(movie => movie !== imdbID);
+    await list.save();
+    res.status(200).send('Movie removed from the list');
+  } catch (error) {
+    console.error('Error removing movie from list:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
+
+
 
 /**
  * @swagger
@@ -903,6 +1029,7 @@ app.delete('/lists/:id', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
+
 app.get('/search', async (req, res) => {
   try {
     const { s, type, y, plot, page } = req.query;
