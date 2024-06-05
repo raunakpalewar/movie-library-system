@@ -1,20 +1,30 @@
 import React from 'react';
 import styles from './Modal.module.css';
 
-const ViewListModal = ({ list, movies, onClose }) => {
+const Modal = ({ show, onClose, listName, movies }) => {
+  if (!show) {
+    return null;
+  }
+
   return (
-    <div className={styles.modalBackdrop}>
-      <div className={styles.modal}>
-        <h2>{list}</h2>
-        <ul>
-          {movies.map((movie) => (
-            <li key={movie}>{movie}</li>
-          ))}
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalContent}>
+        <h2>{listName}</h2>
+        <button onClick={onClose} className={styles.closeButton}>Close</button>
+        <ul className={styles.movieList}>
+          {movies.length > 0 ? (
+            movies.map((movie) => (
+              <li key={movie.imdbID} className={styles.movieItem}>
+                {movie.title}
+              </li>
+            ))
+          ) : (
+            <p className={styles.noMovies}>No movies in this list</p>
+          )}
         </ul>
-        <button onClick={onClose}>Close</button>
       </div>
     </div>
   );
 };
 
-export default ViewListModal;
+export default Modal;

@@ -44,6 +44,11 @@
   .listItem {
     padding: 0.5rem;
     border-bottom: 1px solid var(--primary-color);
+      cursor: pointer;
+
+  }
+  .listItem:hover{
+    color: blueviolet;
   }
   
   .noLists {

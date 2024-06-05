@@ -1,0 +1,44 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    
+  }
+  
+  .modalContent {
+    background: #fff;
+    padding: 20px;
+    border-radius: 4px;
+    width: 400px;
+    max-width: 100%;
+  }
+  
+  .closeButton {
+    background: #f00;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    float: right;
+  }
+  
+  .movieList {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .movieItem {
+    margin: 5px 0;
+  }
+  
+  .noMovies {
+    color: #888;
+  }
+  
