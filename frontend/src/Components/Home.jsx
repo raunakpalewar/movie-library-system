@@ -21,6 +21,7 @@ const Home = () => {
   const [showViewListModal, setShowViewListModal] = useState(false);
   const [selectedList, setSelectedList] = useState(null);
   const [selectedListMovies, setSelectedListMovies] = useState([]);
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
   useEffect(() => {
     fetchLists();
@@ -28,10 +29,32 @@ const Home = () => {
 
   const fetchLists = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/lists');
+      const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+      const response = await axios.get('http://localhost:5000/lists', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setLists(response.data);
     } catch (error) {
       console.error('Error fetching lists:', error);
+    }
+  };
+  const verifyToken = async (token) => {
+    try {
+      const response = await axios.get('http://localhost:5000/verifyToken', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.data.valid) {
+        localStorage.removeItem('token');
+        window.location.href = '/'; // Redirect to the login page
+    }
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      localStorage.removeItem('token');
+      window.location.href = '/'; // Redirect to the login page
     }
   };
 
@@ -61,19 +84,14 @@ const Home = () => {
     }
   };
 
-  const handleAddToList = async (listName) => {
-    try {
-      await axios.put(`http://localhost:5000/lists/${listName}`, { movies: selectedListMovies });
-      setShowAddToListModal(false);
-      fetchLists(); // Refresh lists after adding movie to a list
-    } catch (error) {
-      console.error('Error adding movie to list:', error);
-    }
-  };
-
   const handleViewList = async (listName) => {
     try {
-      const response = await axios.get(`http://localhost:5000/lists/${listName}`);
+      const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+      const response = await axios.get(`http://localhost:5000/lists/${listName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setSelectedList(listName);
       setSelectedListMovies(response.data.movies);
       setShowViewListModal(true);
@@ -82,10 +100,18 @@ const Home = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Clear the token
+    window.location.href = '/'; // Redirect to the login page
+  };
+
   return (
     <div className={styles.container}>
       <Sidebar lists={lists} createNewList={createNewList} onViewList={handleViewList} />
       <div className={styles.mainContent}>
+        <div className={styles.logoutButtonContainer}>
+          <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
+        </div>
         <div className={styles.searchContainer}>
           <h1>Movie Search</h1>
           <form onSubmit={handleSearch} className={styles.searchForm}>
@@ -125,88 +151,90 @@ const Home = () => {
                   onChange={(e) => setType(e.target.value)}
                   placeholder="e.g., movie, series"
                   className={styles.input}
-                  />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>Genre:</label>
-                  <input
-                    type="text"
-                    value={genre}
-                    onChange={(e) => setGenre(e.target.value)}
-                    placeholder="e.g., Action, Comedy"
-                    className={styles.input}
-                  />
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label>Genre:</label>
+                <input
+                  type="text"
+                  value={genre}
+                  onChange={(e) => setGenre(e.target.value)}
+                  placeholder="e.g., Action, Comedy"
+                  className={styles.input}
+                />
+              </div>
+            </div>
+          )}
+          {error && <p className={styles.error}>{error}</p>}
+        </div>
+        {loading ? (
+          <div className={styles.loaderContainer}>
+            <TailSpin
+              type="Oval"
+              color="#007bff"
+              height={50}
+              width={50}
+            />
+          </div>
+        ) : (
+          <>
+            {directResult && (
+              <div className={styles.directResultContainer}>
+                <h2>{directResult.Title} ({directResult.Year})</h2>
+                <div className={styles.directResult}>
+                  <img src={directResult.Poster} alt={directResult.Title} className={styles.directPoster} />
+                  <div className={styles.directInfo}>
+                    <p><strong>Rating:</strong> {directResult.imdbRating} / 10</p>
+                    <p><strong>Genre:</strong> {directResult.Genre}</p>
+                    <p><strong>Plot:</strong> {directResult.Plot}</p>
+                    <p><strong>Director:</strong> {directResult.Director}</p>
+                    <p><strong>Actors:</strong> {directResult.Actors}</p>
+                    <p><strong>Awards:</strong> {directResult.Awards}</p>
+                  </div>
                 </div>
               </div>
             )}
-            {error && <p className={styles.error}>{error}</p>}
-          </div>
-          {loading ? (
-            <div className={styles.loaderContainer}>
-              <TailSpin
-                type="Oval"
-                color="#007bff"
-                height={50}
-                width={50}
-              />
-            </div>
-          ) : (
-            <>
-              {directResult && (
-                <div className={styles.directResultContainer}>
-                  <h2>{directResult.Title} ({directResult.Year})</h2>
-                  <div className={styles.directResult}>
-                    <img src={directResult.Poster} alt={directResult.Title} className={styles.directPoster} />
-                    <div className={styles.directInfo}>
-                      <p><strong>Rating:</strong> {directResult.imdbRating} / 10</p>
-                      <p><strong>Genre:</strong> {directResult.Genre}</p>
-                      <p><strong>Plot:</strong> {directResult.Plot}</p>
-                      <p><strong>Director:</strong> {directResult.Director}</p>
-                      <p><strong>Actors:</strong> {directResult.Actors}</p>
-                      <p><strong>Awards:</strong> {directResult.Awards}</p>
-                    </div>
+            <div className={styles.moviesContainer}>
+              {searchResults.map((movie) => (
+                <div key={movie.imdbID} className={styles.movieTile}>
+                  <img src={movie.Poster} alt={movie.Title} className={styles.moviePoster} />
+                  <div className={styles.movieInfo}>
+                    <h2>{movie.Title}</h2>
+                    <p><strong>Year:</strong> {movie.Year}</p>
+                    <p><strong>Type:</strong> {movie.Type}</p>
+                    <p><strong>IMDb ID:</strong> {movie.imdbID}</p>
+                    <button
+                      className={styles.addButton}
+                      onClick={() => {
+                        setSelectedMovie(movie.imdbID);
+                        setShowAddToListModal(true);
+                      }}
+                    >
+                      Add to List
+                    </button>
                   </div>
                 </div>
-              )}
-              <div className={styles.moviesContainer}>
-                {searchResults.map((movie) => (
-                  <div key={movie.imdbID} className={styles.movieTile}>
-                    <img src={movie.Poster} alt={movie.Title} className={styles.moviePoster} />
-                    <div className={styles.movieInfo}>
-                      <h2>{movie.Title}</h2>
-                      <p><strong>Year:</strong> {movie.Year}</p>
-                      <p><strong>Type:</strong> {movie.Type}</p>
-                      <p><strong>IMDb ID:</strong> {movie.imdbID}</p>
-                      <button
-                        className={styles.addButton}
-                        onClick={() => setShowAddToListModal(true)}
-                      >
-                        Add to List
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-        {showAddToListModal && (
-          <AddToListModal
-            lists={lists}
-            onClose={() => setShowAddToListModal(false)}
-            onAddToList={handleAddToList}
-          />
-        )}
-        {showViewListModal && (
-          <ViewListModal
-            list={selectedList}
-            movies={selectedListMovies}
-            onClose={() => setShowViewListModal(false)}
-          />
+              ))}
+            </div>
+          </>
         )}
       </div>
-    );
-  };
-  
-  export default Home;
-  
+      {showAddToListModal && (
+        <AddToListModal
+          imdbID={selectedMovie}
+          onClose={() => setShowAddToListModal(false)}
+        //   onAddToList={handleAddToList}
+        />
+      )}
+      {showViewListModal && (
+        <ViewListModal
+          list={selectedList}
+          movies={selectedListMovies}
+          onClose={() => setShowViewListModal(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default Home;

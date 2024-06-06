@@ -11,19 +11,19 @@ const Sidebar = () => {
   const [movies, setMovies] = useState([]);
 
   // Fetch lists from the backend
-  useEffect(() => {
-    const fetchLists = async () => {
-      try {
-        const token = localStorage.getItem('token'); // Get the token from local storage
-        const response = await axios.get('http://localhost:5000/lists', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setLists(response.data);
-      } catch (error) {
-        console.error('Error fetching lists:', error);
-      }
-    };
+  const fetchLists = async () => {
+    try {
+      const token = localStorage.getItem('token'); // Get the token from local storage
+      const response = await axios.get('http://localhost:5000/lists', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLists(response.data);
+    } catch (error) {
+      console.error('Error fetching lists:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchLists();
   }, []);
 
@@ -40,11 +40,7 @@ const Sidebar = () => {
           }
         );
         setNewListName('');
-        // Fetch the updated list of lists
-        const response = await axios.get('http://localhost:5000/lists', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setLists(response.data);
+        fetchLists(); // Reload the sidebar after creating a new list
       } catch (error) {
         console.error('Error creating list:', error);
       }
@@ -97,7 +93,15 @@ const Sidebar = () => {
           <p className={styles.noLists}>No lists available</p>
         )}
       </ul>
-      <Modal show={showModal} onClose={closeModal} listName={selectedList} movies={movies} />
+      <Modal
+        show={showModal}
+        onClose={closeModal}
+        listName={selectedList}
+        movies={movies}
+        onDeleteMovie={() => fetchLists()}
+        onDeleteList={() => fetchLists()}
+        reloadSidebar={fetchLists}
+      />
     </div>
   );
 };

@@ -9,15 +9,25 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    
+    overflow-y: auto; /* Enable vertical scrolling */
+
+
   }
   
   .modalContent {
     background: #fff;
     padding: 20px;
     border-radius: 4px;
-    width: 400px;
+    width: 500px; /* Increased width for more space */
     max-width: 100%;
+    margin: 600px 10px 100px 10px;
+
+  }
+  
+  .modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .closeButton {
@@ -26,7 +36,15 @@
     border: none;
     padding: 5px 10px;
     cursor: pointer;
-    float: right;
+  }
+  
+  .deleteListButton {
+    background: #dc3545; /* Bootstrap danger color */
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    margin-bottom: 10px; /* Add some space below the button */
   }
   
   .movieList {
@@ -35,10 +53,48 @@
   }
   
   .movieItem {
-    margin: 5px 0;
+    margin: 10px 0; /* Increased margin for more spacing between movies */
+  }
+  
+  .poster {
+    width: 50px; /* Adjust size of the movie poster */
+    margin-right: 10px; /* Add space between poster and movie title */
+  }
+  
+  .div2 {
+    display: flex;
+    align-items: center;
+  }
+  
+  .deleteButton {
+    background: #007bff; /* Bootstrap primary color */
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
   }
   
   .noMovies {
     color: #888;
   }
   
+
+  .div2{
+    display: flex;
+    gap: 30px;
+    flex-direction: row;
+  }
+
+  .deleteListButton{
+    background-color: orange;
+    color: #000000;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+.deleteListButton:hover{
+    background-color: orangered;
+
+}

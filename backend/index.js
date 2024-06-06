@@ -73,19 +73,35 @@ const listSchema = new mongoose.Schema({
 });
 
 const List = mongoose.model('List', listSchema);
-
 const movieSchema = new mongoose.Schema({
   imdbID: { type: String, required: true },
   title: { type: String, required: true },
   year: { type: String },
+  rated: { type: String },
+  released: { type: String },
+  runtime: { type: String },
   genre: { type: String },
   director: { type: String },
+  writer: { type: String },
+  actors: { type: String },
   plot: { type: String },
+  language: { type: String },
+  country: { type: String },
+  awards: { type: String },
   poster: { type: String },
-  // Add other properties as needed
+  ratings: { type: Array },
+  metascore: { type: String },
+  imdbRating: { type: String },
+  imdbVotes: { type: String },
+  type: { type: String },
+  dvd: { type: String },
+  boxOffice: { type: String },
+  production: { type: String },
+  website: { type: String }
 });
 
 const Movie = mongoose.model('Movie', movieSchema);
+
 
 /**
  * @swagger
@@ -296,6 +312,8 @@ app.get('/lists', async (req, res) => {
   }
 });
 
+
+
 /**
  * @swagger
  * /lists/{name}/movies:
@@ -373,7 +391,28 @@ app.post('/lists/:name/movies', async (req, res) => {
         movie = new Movie({
           imdbID: omdbResponse.data.imdbID,
           title: omdbResponse.data.Title,
-          // Add other properties as needed
+          year: omdbResponse.data.Year,
+          rated: omdbResponse.data.Rated,
+          released: omdbResponse.data.Released,
+          runtime: omdbResponse.data.Runtime,
+          genre: omdbResponse.data.Genre,
+          director: omdbResponse.data.Director,
+          writer: omdbResponse.data.Writer,
+          actors: omdbResponse.data.Actors,
+          plot: omdbResponse.data.Plot,
+          language: omdbResponse.data.Language,
+          country: omdbResponse.data.Country,
+          awards: omdbResponse.data.Awards,
+          poster: omdbResponse.data.Poster,
+          ratings: omdbResponse.data.Ratings,
+          metascore: omdbResponse.data.Metascore,
+          imdbRating: omdbResponse.data.imdbRating,
+          imdbVotes: omdbResponse.data.imdbVotes,
+          type: omdbResponse.data.Type,
+          dvd: omdbResponse.data.DVD,
+          boxOffice: omdbResponse.data.BoxOffice,
+          production: omdbResponse.data.Production,
+          website: omdbResponse.data.Website
         });
 
         await movie.save();
@@ -396,6 +435,7 @@ app.post('/lists/:name/movies', async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
 
 
 /**
@@ -466,6 +506,21 @@ app.delete('/lists/:name', async (req, res) => {
  *     responses:
  *       200:
  *         description: Movies retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   imdbID:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   year:
+ *                     type: string
+ *                   poster:
+ *                     type: string
  *       401:
  *         description: Authorization token is required
  *       404:
@@ -493,7 +548,7 @@ app.get('/lists/:name/movies', async (req, res) => {
 
     // Log the list content for debugging
     console.log(`Found list: ${JSON.stringify(list)}`);
-    console.log(`Found list: ${JSON.stringify(list.movies)}`);
+    console.log(`Found list movies: ${JSON.stringify(list.movies)}`);
 
     if (!list.movies.length) {
       return res.status(200).json([]);
@@ -519,12 +574,21 @@ app.get('/lists/:name/movies', async (req, res) => {
     // Log the fetched movies for debugging
     console.log(`Fetched movies: ${JSON.stringify(movies)}`);
 
-    res.json(movies);
+    // Transform the movies to include only imdbID, title, year, and poster
+    const filteredMovies = movies.map(movie => ({
+      imdbID: movie.imdbID,
+      title: movie.title,
+      year: movie.year,
+      poster: movie.poster
+    }));
+
+    res.status(200).json(filteredMovies);
   } catch (error) {
     console.error('Error fetching list movies:', error);
     res.status(500).send('Internal server error');
   }
 });
+
 
 
 
@@ -549,6 +613,17 @@ app.get('/lists/:name/movies', async (req, res) => {
  *           type: string
  *         required: true
  *         description: The IMDb ID of the movie to be removed
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               imdbID:
+ *                 type: string
+ *               title:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Movie removed from the list successfully
@@ -563,7 +638,7 @@ app.delete('/lists/:name/movies', async (req, res) => {
   try {
     const { authorization } = req.headers;
     const { name } = req.params;
-    const { imdbID } = req.query;
+    const { imdbID } = req.body;
 
     if (!authorization) {
       return res.status(401).send('Authorization token is required');
@@ -572,25 +647,33 @@ app.delete('/lists/:name/movies', async (req, res) => {
     const token = authorization.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // Verify token and user existence
+    if (!decoded || !decoded.id) {
+      return res.status(401).send('Invalid authorization token');
+    }
+
+    // Find the list
     const list = await List.findOne({ name, userId: decoded.id });
 
     if (!list) {
       return res.status(404).send('List not found');
     }
 
+    // Check if the movie exists in the list
     if (!list.movies.includes(imdbID)) {
       return res.status(404).send('Movie not found in the list');
     }
 
+    // Remove the movie from the list
     list.movies = list.movies.filter(movie => movie !== imdbID);
     await list.save();
+
     res.status(200).send('Movie removed from the list');
   } catch (error) {
     console.error('Error removing movie from list:', error);
     res.status(500).send('Internal server error');
   }
 });
-
 
 
 
@@ -678,4 +761,37 @@ app.get('/search', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+});
+
+
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     summary: Logout a user
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *       401:
+ *         description: Authorization token is required
+ *       500:
+ *         description: Internal server error
+ */
+app.post('/logout', (req, res) => {
+  try {
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+      return res.status(401).send('Authorization token is required');
+    }
+
+    // Invalidate the token (this is a placeholder since JWTs are stateless)
+    res.status(200).send('User logged out');
+  } catch (error) {
+    console.error('Error during logout:', error);
+    res.status(500).send('Internal server error');
+  }
 });
