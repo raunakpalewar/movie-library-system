@@ -190,6 +190,15 @@ const Home = () => {
                     <p><strong>Director:</strong> {directResult.Director}</p>
                     <p><strong>Actors:</strong> {directResult.Actors}</p>
                     <p><strong>Awards:</strong> {directResult.Awards}</p>
+                    <button
+                      className={styles.addButton}
+                      onClick={() => {
+                        setSelectedMovie(movie.imdbID);
+                        setShowAddToListModal(true);
+                      }}
+                    >
+                      Add to List
+                    </button>
                   </div>
                 </div>
               </div>
