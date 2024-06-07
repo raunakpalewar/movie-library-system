@@ -16,7 +16,7 @@ const Modal = ({ show, onClose, listName, movies: initialMovies, onDeleteMovie, 
   const handleDeleteMovie = async (imdbID, title) => {
     try {
       const token = localStorage.getItem('token'); // Get the token from local storage
-      await axios.delete(`http://localhost:5000/lists/${listName}/movies`, {
+      await axios.delete(`https://movie-library-system.onrender.com/lists/${listName}/movies`, {
         headers: { Authorization: `Bearer ${token}` },
         data: { imdbID, title }
       });
@@ -32,7 +32,7 @@ const Modal = ({ show, onClose, listName, movies: initialMovies, onDeleteMovie, 
   const handleDeleteList = async () => {
     try {
       const token = localStorage.getItem('token'); // Get the token from local storage
-      await axios.delete(`http://localhost:5000/lists/${listName}`, {
+      await axios.delete(`https://movie-library-system.onrender.com/lists/${listName}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       onDeleteList(); // Call the onDeleteList function passed from the parent component

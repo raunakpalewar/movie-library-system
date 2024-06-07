@@ -14,7 +14,7 @@ const AddToListModal = ({ imdbID, onClose }) => {
   const fetchLists = async () => {
     try {
       const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
-      const response = await axios.get('http://localhost:5000/lists', {
+      const response = await axios.get('https://movie-library-system.onrender.com/lists', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -31,7 +31,7 @@ const AddToListModal = ({ imdbID, onClose }) => {
       setLoading(true);
       const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
       await axios.post(
-        `http://localhost:5000/lists/${listName}/movies`,
+        `https://movie-library-system.onrender.com/lists/${listName}/movies`,
         { movies: [imdbID] },
         {
           headers: {

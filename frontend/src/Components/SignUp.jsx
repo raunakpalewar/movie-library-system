@@ -11,7 +11,7 @@ const SignUp = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/signup', { username, password });
+      await axios.post('https://movie-library-system.onrender.com/signup', { username, password });
       setMessage('Signup successful');
     } catch (error) {
       setMessage(error.response.data);

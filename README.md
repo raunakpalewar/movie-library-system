@@ -82,12 +82,7 @@ This project is a movie list application that allows users to search for movies,
 ```
 movie-list-app/
 ├── backend/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── app.js
-│   ├── config.js
+│   ├── index.js
 │   └── server.js
 ├── frontend/
 │   ├── public/

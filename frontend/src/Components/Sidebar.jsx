@@ -14,7 +14,7 @@ const Sidebar = () => {
   const fetchLists = async () => {
     try {
       const token = localStorage.getItem('token'); // Get the token from local storage
-      const response = await axios.get('http://localhost:5000/lists', {
+      const response = await axios.get('https://movie-library-system.onrender.com/lists', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLists(response.data);
@@ -33,7 +33,7 @@ const Sidebar = () => {
       try {
         const token = localStorage.getItem('token'); // Get the token from local storage
         await axios.post(
-          'http://localhost:5000/lists',
+          'https://movie-library-system.onrender.com/lists',
           { name: newListName.trim(), movies: [], public: true },
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -51,7 +51,7 @@ const Sidebar = () => {
   const handleListClick = async (listName) => {
     try {
       const token = localStorage.getItem('token'); // Get the token from local storage
-      const response = await axios.get(`http://localhost:5000/lists/${listName}/movies`, {
+      const response = await axios.get(`https://movie-library-system.onrender.com/lists/${listName}/movies`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSelectedList(listName);

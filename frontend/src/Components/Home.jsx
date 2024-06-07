@@ -30,7 +30,7 @@ const Home = () => {
   const fetchLists = async () => {
     try {
       const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
-      const response = await axios.get('http://localhost:5000/lists', {
+      const response = await axios.get('https://movie-library-system.onrender.com/lists', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -42,7 +42,7 @@ const Home = () => {
   };
   const verifyToken = async (token) => {
     try {
-      const response = await axios.get('http://localhost:5000/verifyToken', {
+      const response = await axios.get('https://movie-library-system.onrender.com/verifyToken', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -71,7 +71,7 @@ const Home = () => {
       if (year) params.y = year;
       if (type) params.type = type;
       if (genre) params.genre = genre;
-      const response = await axios.get('http://localhost:5000/search', { params });
+      const response = await axios.get('https://movie-library-system.onrender.com/search', { params });
       setDirectResult(response.data.directResult || null);
       setSearchResults(response.data.searchResults || []);
       setError('');
@@ -87,7 +87,7 @@ const Home = () => {
   const handleViewList = async (listName) => {
     try {
       const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
-      const response = await axios.get(`http://localhost:5000/lists/${listName}`, {
+      const response = await axios.get(`https://movie-library-system.onrender.com/lists/${listName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
