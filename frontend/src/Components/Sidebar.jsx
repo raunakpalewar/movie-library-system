@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './Sidebar.module.css';
 import Modal from './ViewListModal';
+import CreateListModal from './CreateListModal';
 
 const Sidebar = () => {
   const [lists, setLists] = useState([]);
-  const [newListName, setNewListName] = useState('');
   const [selectedList, setSelectedList] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [movies, setMovies] = useState([]);
 
   // Fetch lists from the backend
@@ -28,19 +29,19 @@ const Sidebar = () => {
   }, []);
 
   // Create a new list
-  const handleCreateList = async () => {
-    if (newListName.trim()) {
+  const handleCreateList = async (name, isPublic) => {
+    if (name.trim()) {
       try {
         const token = localStorage.getItem('token'); // Get the token from local storage
         await axios.post(
           'https://movie-library-system.onrender.com/lists',
-          { name: newListName.trim(), movies: [], public: true },
+          { name: name.trim(), movies: [], public: isPublic },
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setNewListName('');
         fetchLists(); // Reload the sidebar after creating a new list
+        setShowCreateModal(false); // Close the modal
       } catch (error) {
         console.error('Error creating list:', error);
       }
@@ -73,14 +74,7 @@ const Sidebar = () => {
     <div className={styles.sidebar}>
       <h2>My Lists</h2>
       <div className={styles.createList}>
-        <input
-          type="text"
-          value={newListName}
-          onChange={(e) => setNewListName(e.target.value)}
-          placeholder="New list name"
-          className={styles.input}
-        />
-        <button onClick={handleCreateList} className={styles.button}>Create List</button>
+        <button onClick={() => setShowCreateModal(true)} className={styles.button}>Create New List</button>
       </div>
       <ul className={styles.list}>
         {lists.length > 0 ? (
@@ -101,6 +95,11 @@ const Sidebar = () => {
         onDeleteMovie={() => fetchLists()}
         onDeleteList={() => fetchLists()}
         reloadSidebar={fetchLists}
+      />
+      <CreateListModal
+        show={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreate={handleCreateList}
       />
     </div>
   );
