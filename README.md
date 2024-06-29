@@ -3,6 +3,9 @@
 
 This project is a movie list application that allows users to search for movies, create custom lists, and add movies to those lists. It includes features like advanced search, user authentication, and movie details display.
 
+![movie-library-system](movieProject.png)
+
+
 ## Table of Contents
 
 - [Installation](#installation)
